@@ -75,13 +75,36 @@
       const constraints = {}
       constraints[type] = { deviceId: element.deviceId }
       const stream = await getMedia(constraints)
-      console.log(stream.getTracks())
+      // if (type === 'video') {
+      //   console.log(stream.getVideoTracks()[0].getCapabilities())
+      // }
+      // if (type === 'audio') {
+      //   console.log(stream.getAudioTracks()[0].getCapabilities())
+      // }
+      const capabilities = stream.getTracks()
+      capabilities.forEach((track) => {
+        console.log(track.getCapabilities())
+      })
     })
   }
 
-  await getDevicesList('audio')
+  // await getDevicesList('audio')
 
-  await getDevicesList('video')
+  // await getDevicesList('video')
+
+  getMedia({ audio: false, video: {
+    width: { min: 640, ideal: 1280, max: 1920 },
+    height: { min: 480, ideal: 720, max: 1080 },
+  } }).then((stream) => {
+    const capabilities = stream.getTracks()
+    capabilities.forEach((track) => {
+      console.log(track.getCapabilities())
+      document.querySelector('pre').innerText = JSON.stringify(track.getCapabilities(), null, 2)
+      // console.log(track.getSettings())
+      // console.log(track.getConstraints())
+      console.log('------------------')
+    })
+  })
 
   // await getMedia({ audio: true, video: true })
   // console.log(await getDevices('videoinput'))
