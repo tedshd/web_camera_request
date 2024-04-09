@@ -69,7 +69,7 @@
     }
     if (type === 'audio') {
       const microphonePermission = await checkPermission('microphone')
-      if (cameraPermission !== 'granted') {
+      if (microphonePermission !== 'granted') {
         throw new Error('Microphone permission denied')
       }
     }
