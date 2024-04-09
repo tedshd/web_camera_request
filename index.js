@@ -48,8 +48,7 @@
    */
   async function getDevices(type) {
     if (!navigator.mediaDevices?.enumerateDevices) {
-      console.log("enumerateDevices() not supported.")
-      return
+      throw new Error("enumerateDevices() not supported.")
     }
 
     try {
@@ -63,10 +62,16 @@
 
   async function getDevicesList(type) {
     if (type === 'video') {
-      await checkPermission('camera')
+      const cameraPermission = await checkPermission('camera')
+      if (cameraPermission !== 'granted') {
+        throw new Error('Camera permission denied')
+      }
     }
     if (type === 'audio') {
-      await checkPermission('microphone')
+      const microphonePermission = await checkPermission('microphone')
+      if (cameraPermission !== 'granted') {
+        throw new Error('Microphone permission denied')
+      }
     }
     const devices = await getDevices(`${type}input`)
     const devicesList = []
@@ -88,14 +93,12 @@
     })
   }
 
-  // await getDevicesList('audio')
+  await getDevicesList('audio')
 
   // await getDevicesList('video')
 
-  getMedia({ audio: false, video: {
-    width: { min: 640, ideal: 1280, max: 1920 },
-    height: { min: 480, ideal: 720, max: 1080 },
-  } }).then((stream) => {
+
+  getMedia({ audio: true }).then((stream) => {
     const capabilities = stream.getTracks()
     capabilities.forEach((track) => {
       console.log(track.getCapabilities())
@@ -105,6 +108,19 @@
       console.log('------------------')
     })
   })
+  // getMedia({ audio: false, video: {
+  //   width: { min: 640, ideal: 1280, max: 1920 },
+  //   height: { min: 480, ideal: 720, max: 1080 },
+  // } }).then((stream) => {
+  //   const capabilities = stream.getTracks()
+  //   capabilities.forEach((track) => {
+  //     console.log(track.getCapabilities())
+  //     document.querySelector('pre').innerText = JSON.stringify(track.getCapabilities(), null, 2)
+  //     // console.log(track.getSettings())
+  //     // console.log(track.getConstraints())
+  //     console.log('------------------')
+  //   })
+  // })
 
   // await getMedia({ audio: true, video: true })
   // console.log(await getDevices('videoinput'))
