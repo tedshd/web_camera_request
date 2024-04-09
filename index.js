@@ -8,36 +8,38 @@
    */
   async function checkPermission(permissionName, doSomething) {
     if (!navigator.permissions || !navigator.permissions.query) {
-      console.log('Permissions API not supported')
-      return
+      console.log("Permissions API not supported");
+      return;
     }
 
     try {
-      const permissions = await navigator.permissions.query({ name: permissionName })
-      console.log(permissions.state)
+      const permissions = await navigator.permissions.query({
+        name: permissionName,
+      });
+      console.log(permissions.state);
       permissions.onchange = (event) => {
-        console.log(event.target.state)
+        console.log(event.target.state);
         if (doSomething) {
-          doSomething(event)
+          doSomething(event);
         }
-      }
-      return permissions.state
+      };
+      return permissions.state;
     } catch (err) {
-      console.error(`${err.name}: ${err.message}`)
+      console.error(`${err.name}: ${err.message}`);
     }
   }
 
   async function getMedia(constraints) {
-    let stream = null
+    let stream = null;
 
     try {
-      stream = await navigator.mediaDevices.getUserMedia(constraints)
-      console.log('Got MediaStream:', stream)
-      return stream
+      stream = await navigator.mediaDevices.getUserMedia(constraints);
+      console.log("Got MediaStream:", stream);
+      return stream;
       /* use the stream */
     } catch (err) {
       /* handle the error */
-      console.error(`${err.name}: ${err.message}`)
+      console.error(`${err.name}: ${err.message}`);
     }
   }
 
@@ -48,55 +50,53 @@
    */
   async function getDevices(type) {
     if (!navigator.mediaDevices?.enumerateDevices) {
-      throw new Error("enumerateDevices() not supported.")
+      throw new Error("enumerateDevices() not supported.");
     }
 
     try {
-      const devices = await navigator.mediaDevices.enumerateDevices()
-      console.log(devices)
-      return devices.filter(device => device.kind === type)
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      console.log(devices);
+      return devices.filter((device) => device.kind === type);
     } catch (err) {
-      console.error(`${err.name}: ${err.message}`)
+      console.error(`${err.name}: ${err.message}`);
     }
   }
 
   async function getDevicesList(type) {
-    if (type === 'video') {
-      const cameraPermission = await checkPermission('camera')
-      if (cameraPermission !== 'granted') {
-        throw new Error('Camera permission denied')
-      }
-    }
-    if (type === 'audio') {
-      const microphonePermission = await checkPermission('microphone')
-      if (microphonePermission !== 'granted') {
-        throw new Error('Microphone permission denied')
-      }
-    }
-    const devices = await getDevices(`${type}input`)
-    const devicesList = []
-    console.log(devices)
-    devices.forEach(async (element) => {
-      const constraints = {}
-      constraints[type] = { deviceId: element.deviceId }
-      const stream = await getMedia(constraints)
-      // if (type === 'video') {
-      //   console.log(stream.getVideoTracks()[0].getCapabilities())
+    if (type === "video") {
+      const cameraPermission = await checkPermission("camera");
+      // return
+      // if (cameraPermission !== 'granted') {
+      //   throw new Error('Camera permission denied')
       // }
-      // if (type === 'audio') {
-      //   console.log(stream.getAudioTracks()[0].getCapabilities())
+    }
+    if (type === "audio") {
+      const microphonePermission = await checkPermission("microphone");
+      // return
+      // if (microphonePermission !== 'granted') {
+      //   throw new Error('Microphone permission denied')
       // }
-      const capabilities = stream.getTracks()
-      capabilities.forEach((track) => {
-        console.log(track.getCapabilities())
+    }
+    const devices = await getDevices(`${type}input`);
+    console.log('devices', devices)
+    const devicesList = await Promise.all(
+      devices.map(async (element) => {
+        const constraints = {};
+        constraints[type] = { deviceId: element.deviceId };
+        const stream = await getMedia(constraints);
+        const capabilities = await stream.getTracks();
+        return capabilities.map((track) => track.getCapabilities());
       })
-    })
+    );
+    return devicesList.flat(); // 将嵌套的数组扁平化
   }
 
-  await getDevicesList('audio')
+  // console.log(await getDevicesList('video'))
+  const list = await getDevicesList("video");
+  console.log(list);
+  document.querySelector("pre").innerText = JSON.stringify(list, null, 2);
 
   // await getDevicesList('video')
-
 
   // getMedia({ audio: true }).then((stream) => {
   //   const capabilities = stream.getTracks()
@@ -108,19 +108,19 @@
   //     console.log('------------------')
   //   })
   // })
-  getMedia({ audio: false, video: {
-    width: { min: 640, ideal: 1280, max: 1920 },
-    height: { min: 480, ideal: 720, max: 1080 },
-  } }).then((stream) => {
-    const capabilities = stream.getTracks()
-    capabilities.forEach((track) => {
-      console.log(track.getCapabilities())
-      document.querySelector('pre').innerText = JSON.stringify(track.getCapabilities(), null, 2)
-      // console.log(track.getSettings())
-      // console.log(track.getConstraints())
-      console.log('------------------')
-    })
-  })
+  // getMedia({ audio: false, video: {
+  //   width: { min: 640, ideal: 1280, max: 1920 },
+  //   height: { min: 480, ideal: 720, max: 1080 },
+  // } }).then((stream) => {
+  //   const capabilities = stream.getTracks()
+  //   capabilities.forEach((track) => {
+  //     console.log(track.getCapabilities())
+  //     document.querySelector('pre').innerText = JSON.stringify(track.getCapabilities(), null, 2)
+  //     // console.log(track.getSettings())
+  //     // console.log(track.getConstraints())
+  //     console.log('------------------')
+  //   })
+  // })
 
   // await getMedia({ audio: true, video: true })
   // console.log(await getDevices('videoinput'))
@@ -133,5 +133,4 @@
   //   devicesInfo.push()
   // });
   // console.log(devicesInfo)
-
-})()
+})();
