@@ -1,15 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>web camera request</title>
 </head>
+
 <body>
   <section></section>
   <section>
-    <pre></pre>
+    <pre id="pre1"></pre>
+  </section>
+  <section>
+    <pre id="pre2"></pre>
   </section>
 </body>
 <script src="./index.js"></script>
+<script>
+  (async () => {
+
+    const getCameraList = async () => {
+      const list = await getDevicesList("video");
+      console.log(list);
+      document.querySelector("#pre1").innerText = JSON.stringify(list, null, 2);
+    }
+
+    const getMircophoneList = async () => {
+      const list = await getDevicesList("audio");
+      console.log(list);
+      document.querySelector("#pre2").innerText = JSON.stringify(list, null, 2);
+    }
+
+    const permissionResult = await checkPermission("camera", (event) => {
+      if (event.target.state === "denied") {
+        alert('Camera permission denied')
+      } else {
+        getCameraList();
+      }
+    });
+    if (permissionResult === "prompt") {
+      await getMedia({
+        video: true
+      });
+    }
+    switch (permissionResult) {
+      case "denied":
+        alert('Camera permission denied')
+        break;
+      default:
+        getCameraList();
+        break;
+    }
+
+    const permissionResult2 = await checkPermission("microphone", (event) => {
+      if (event.target.state === "denied") {
+        alert('Microphone permission denied')
+      } else {
+        getMircophoneList();
+      }
+    });
+    if (permissionResult2 === "prompt") {
+      await getMedia({
+        audio: true
+      });
+    }
+    switch (permissionResult2) {
+      case "denied":
+        alert('Microphone permission denied')
+        break;
+      default:
+        getMircophoneList();
+        break;
+    }
+
+  })()
+</script>
+
 </html>
