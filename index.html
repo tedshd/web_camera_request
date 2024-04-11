@@ -15,6 +15,7 @@
   <section>
     <pre id="pre2"></pre>
   </section>
+  <ul id="list"></ul>
 </body>
 <script src="./index.js"></script>
 <script>
@@ -24,8 +25,6 @@
 
     const getCameraList = async () => {
       const list = await getDevicesList("video");
-      console.log(list);
-      document.querySelector("#pre1").innerText = JSON.stringify(list, null, 2);
       return list;
     }
 
@@ -56,32 +55,50 @@
         break;
     }
 
-    const videoPlay = async (device, videoDom) => {
+    const streamStart = async (device, videoDom) => {
       const stream = await getMedia({
         video: {
-          "deviceId": device.capabilities.deviceId,
-          "width": {
+          deviceId: device.capabilities.deviceId,
+          width: {
             min: device.capabilities.width.min,
-            ideal: 1280,
+            ideal: 1920,
             max: device.capabilities.width.max
           },
-          "height": {
+          height: {
             min: device.capabilities.height.min,
-            ideal: 720,
+            ideal: 1080,
             max: device.capabilities.height.max
           },
         }
       });
-      console.log('stream', stream)
+      if (!device.capabilities.facingMode ||
+        !device.capabilities.facingMode.length ||
+        !device.capabilities.facingMode !== "environment"
+      ) {
+        videoDom.style.transform = "rotateY(180deg)";
+      }
       videoDom.srcObject = stream;
       videoDom.addEventListener("loadedmetadata", (event) => {
         videoDom.play();
-        console.log('loadedmetadata', event)
       })
+      return stream;
     }
 
-    console.log('list', list)
-    await videoPlay(list[0], document.querySelector("video"));
+    // console.log('list', list)
+    // const streamCamera = await streamStart(list[0], document.querySelector("video"));
+    document.querySelector("#pre1").innerText = JSON.stringify(list, null, 2);
+    list.map((device) => {
+      const li = document.createElement("li");
+      li.innerText = device.device.label;
+      document.querySelector("#list").appendChild(li);
+      li.addEventListener("click", async (event) => {
+        document.querySelector("video").pause()
+        document.querySelector("video").srcObject = null;
+        streamCamera = null;
+        streamCamera = await streamStart(device, document.querySelector("video"));
+      });
+    });
+
 
 
     // const permissionResult2 = await checkPermission("microphone", (event) => {
