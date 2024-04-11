@@ -8,7 +8,7 @@
 </head>
 
 <body>
-  <section></section>
+  <video src=""></video>
   <section>
     <pre id="pre1"></pre>
   </section>
@@ -20,23 +20,26 @@
 <script>
   (async () => {
 
+    let list = [];
+
     const getCameraList = async () => {
       const list = await getDevicesList("video");
       console.log(list);
       document.querySelector("#pre1").innerText = JSON.stringify(list, null, 2);
+      return list;
     }
 
-    const getMircophoneList = async () => {
-      const list = await getDevicesList("audio");
-      console.log(list);
-      document.querySelector("#pre2").innerText = JSON.stringify(list, null, 2);
-    }
+    // const getMircophoneList = async () => {
+    //   const list = await getDevicesList("audio");
+    //   console.log(list);
+    //   document.querySelector("#pre2").innerText = JSON.stringify(list, null, 2);
+    // }
 
-    const permissionResult = await checkPermission("camera", (event) => {
+    const permissionResult = await checkPermission("camera", async (event) => {
       if (event.target.state === "denied") {
         alert('Camera permission denied')
       } else {
-        getCameraList();
+        list = await getCameraList();
       }
     });
     if (permissionResult === "prompt") {
@@ -49,30 +52,58 @@
         alert('Camera permission denied')
         break;
       default:
-        getCameraList();
+        list = await getCameraList();
         break;
     }
 
-    const permissionResult2 = await checkPermission("microphone", (event) => {
-      if (event.target.state === "denied") {
-        alert('Microphone permission denied')
-      } else {
-        getMircophoneList();
-      }
-    });
-    if (permissionResult2 === "prompt") {
-      await getMedia({
-        audio: true
+    const videoPlay = async (device, videoDom) => {
+      const stream = await getMedia({
+        video: {
+          "deviceId": device.capabilities.deviceId,
+          "width": {
+            min: device.capabilities.width.min,
+            ideal: 1280,
+            max: device.capabilities.width.max
+          },
+          "height": {
+            min: device.capabilities.height.min,
+            ideal: 720,
+            max: device.capabilities.height.max
+          },
+        }
       });
+      console.log('stream', stream)
+      videoDom.srcObject = stream;
+      videoDom.addEventListener("loadedmetadata", (event) => {
+        videoDom.play();
+        console.log('loadedmetadata', event)
+      })
     }
-    switch (permissionResult2) {
-      case "denied":
-        alert('Microphone permission denied')
-        break;
-      default:
-        getMircophoneList();
-        break;
-    }
+
+    console.log('list', list)
+    await videoPlay(list[0], document.querySelector("video"));
+
+
+    // const permissionResult2 = await checkPermission("microphone", (event) => {
+    //   if (event.target.state === "denied") {
+    //     alert('Microphone permission denied')
+    //   } else {
+    //     getMircophoneList();
+    //   }
+    // });
+    // if (permissionResult2 === "prompt") {
+    //   await getMedia({
+    //     audio: true
+    //   });
+    // }
+    // switch (permissionResult2) {
+    //   case "denied":
+    //     alert('Microphone permission denied')
+    //     break;
+    //   default:
+    //     getMircophoneList();
+    //     break;
+    // }
 
   })()
 </script>
