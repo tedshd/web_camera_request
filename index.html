@@ -73,7 +73,7 @@
       });
       if (!device.capabilities.facingMode ||
         !device.capabilities.facingMode.length ||
-        !device.capabilities.facingMode !== "environment"
+        !device.capabilities.facingMode[0] !== "environment"
       ) {
         videoDom.style.transform = "rotateY(180deg)";
       }
