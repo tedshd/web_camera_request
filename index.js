@@ -1,4 +1,10 @@
 /**
+ * https://developer.mozilla.org/en-US/docs/Web/API/Media_Capture_and_Streams_API
+ * https://developer.mozilla.org/en-US/docs/Web/API/MediaStream
+ * https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackConstraints
+ */
+
+/**
  *
  * @param {*} permissionName string 'microphone' or 'camera'
  * @returns string 'granted' or 'denied' or 'prompt' or 'unknown'
@@ -23,6 +29,14 @@ async function checkPermission(permissionName, doSomething) {
   }
 }
 
+/**
+ *
+ * @param {*} constraints
+ * @returns
+ * https://developer.mozilla.org/en-US/docs/Web/API/Media_Capture_and_Streams_API/Constraints
+ * https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackConstraints
+ * https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
+ */
 async function getMedia(constraints) {
   let stream = null;
 
@@ -39,7 +53,9 @@ async function getMedia(constraints) {
 /**
  *
  * @param {*} type string 'audioinput' or 'videoinput' or 'audiooutput'
- * @returns
+ * @returns array of MediaDeviceInfo
+ * https://developer.mozilla.org/en-US/docs/Web/API/MediaDeviceInfo
+ * https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices
  */
 async function getDevices(type) {
   if (!navigator.mediaDevices?.enumerateDevices) {
@@ -54,6 +70,13 @@ async function getDevices(type) {
   }
 }
 
+/**
+ *
+ * @param {*} type string 'audio' or 'video'
+ * @returns {device: MediaDeviceInfo, capabilities: MediaTrackCapabilities}[]
+ * https://developer.mozilla.org/en-US/docs/Web/API/MediaStreamTrack/getCapabilities
+ * https://developer.mozilla.org/en-US/docs/Web/API/MediaStreamTrack
+ */
 async function getDevicesList(type) {
   const devices = await getDevices(`${type}input`);
   const devicesList = await Promise.all(
