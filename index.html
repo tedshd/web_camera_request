@@ -34,6 +34,14 @@
     //   document.querySelector("#pre2").innerText = JSON.stringify(list, null, 2);
     // }
 
+    try {
+      await getMedia({
+        video: true
+      });
+    } catch (error) {
+      alert('ERR:' + error)
+    }
+
     const permissionResult = await checkPermission("camera", async (event) => {
       if (event.target.state === "denied") {
         alert('Camera permission denied')
