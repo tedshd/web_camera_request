@@ -64,6 +64,7 @@
     }
 
     const streamStart = async (device, videoDom) => {
+      console.log('device', device);
       const stream = await getMedia({
         video: {
           deviceId: device.capabilities.deviceId,
@@ -77,6 +78,14 @@
             ideal: 1080,
             max: device.capabilities.height.max
           },
+          // width: {
+          //   ideal: 1280
+          // },
+          // height: {
+          //   ideal: 720
+          // },
+          // width: 1920,
+          // height: 1080,
         }
       });
       if (!device.capabilities.facingMode ||
@@ -87,6 +96,8 @@
       } else {
         videoDom.style.transform = "rotateY(0deg)";
       }
+      console.log('stream', stream.getVideoTracks()[0].getSettings());
+      document.querySelector("#pre2").innerText = JSON.stringify(stream.getVideoTracks()[0].getSettings(), null, 2);
       videoDom.srcObject = stream;
       videoDom.addEventListener("loadedmetadata", (event) => {
         videoDom.play();
